@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Riya's Secret Diary 💕</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Poppins:wght@300;400;600&display=swap');
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        .cursive {
+            font-family: 'Dancing Script', cursive;
+        }
+        
+        @keyframes float {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+        
+        .animate-float {
+            animation: float 4s ease-in-out forwards;
+        }
+        
+        @keyframes fadeIn {
+            from { 
+                opacity: 0; 
+                transform: translateY(20px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            }
+        }
+        
+        .animate-fadeIn {
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { 
+                transform: scale(1); 
+            }
+            50% { 
+                transform: scale(1.05); 
+            }
+        }
+        
+        .animate-pulse-custom {
+            animation: pulse 2s infinite;
+        }
+
+        .heart-icon {
+            width: 20px;
+            height: 20px;
+            position: absolute;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-pink-100 via-purple-50 to-pink-50 min-h-screen overflow-x-hidden">
+    
+    <!-- Floating Hearts Container -->
+    <div id="heartsContainer" class="fixed inset-0 pointer-events-none z-0"></div>
+
+    <!-- Login Page -->
+    <div id="loginPage" class="min-h-screen flex items-center justify-center relative z-10">
+        <div class="bg-white/80 backdrop-blur-sm p-10 rounded-3xl shadow-2xl max-w-md w-full mx-4 transition-all duration-1000" id="loginBox">
+            <div class="text-center mb-8">
+                <svg class="mx-auto mb-4 animate-pulse-custom" width="60" height="60" viewBox="0 0 24 24" fill="#ec4899">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                </svg>
+                <h1 class="text-4xl font-bold text-pink-600 mb-2 cursive">Riya's Secret Diary</h1>
+                <p class="text-gray-600 text-sm">A place made with love, just for you 💕</p>
+            </div>
+
+            <div class="space-y-6">
+                <div>
+                    <label class="block text-gray-700 mb-2 font-semibold">Username</label>
+                    <input type="text" value="riya" disabled class="w-full px-4 py-3 rounded-xl bg-pink-50 border-2 border-pink-200 text-gray-700">
+                </div>
+
+                <div>
+                    <label class="block text-gray-700 mb-2 font-semibold">Password</label>
+                    <div class="relative">
+                        <svg class="absolute left-3 top-3.5 text-pink-400" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                        </svg>
+                        <input type="password" id="passwordInput" placeholder="Enter your special password" class="w-full pl-11 pr-4 py-3 rounded-xl border-2 border-pink-200 focus:border-pink-400 focus:outline-none">
+                    </div>
+                </div>
+
+                <button onclick="handleLogin()" class="w-full bg-gradient-to-r from-pink-400 to-purple-400 text-white py-3 rounded-xl font-semibold hover:from-pink-500 hover:to-purple-500 transition-all transform hover:scale-105 shadow-lg">
+                    Enter My Diary 💝
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Dashboard -->
+    <div id="dashboard" class="hidden p-4">
+        <div class="max-w-4xl mx-auto py-8 animate-fadeIn">
+            
+            <!-- Header -->
+            <div class="text-center mb-8">
+                <h1 class="text-5xl font-bold text-pink-600 mb-2 cursive">Welcome Back, Riya 💕</h1>
+                <div class="flex items-center justify-center gap-2 text-gray-600">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                    </svg>
+                    <p>Day <span id="currentDay">1</span> of our journey | <span id="daysCount">0</span> days together 💫</p>
+                </div>
+            </div>
+
+            <!-- Daily Message Card -->
+            <div class="bg-white/90 backdrop-blur-sm rounded-3xl shadow-2xl p-8 mb-6 transform hover:scale-105 transition-all">
+                <div class="flex items-start gap-4">
+                    <svg class="text-pink-500 flex-shrink-0 mt-1" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                        <path d="M20 8.5 14 12l6 3.5"></path>
+                    </svg>
+                    <div class="flex-1">
+                        <h2 class="text-2xl font-bold text-pink-600 mb-3 cursive">Today's Message for You</h2>
+                        <p class="text-3xl text-gray-800 mb-4 cursive" id="dailyMessage"></p>
+                        <p class="text-gray-600 italic border-l-4 border-pink-300 pl-4" id="dailyNote"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mood Section -->
+            <div class="bg-white/90 backdrop-blur-sm rounded-3xl shadow-2xl p-8 mb-6">
+                <button onclick="toggleMoodSection()" class="w-full text-left flex items-center justify-between group">
+                    <h3 class="text-2xl font-bold text-pink-600 cursive">How are you feeling today? 🌸</h3>
+                    <span class="text-pink-400 group-hover:scale-110 transition-transform" id="moodArrow">▶</span>
+                </button>
+
+                <div id="moodContent" class="hidden mt-6 animate-fadeIn">
+                    <div class="flex gap-6 justify-center mb-6">
+                        <button onclick="handleMood('happy')" class="flex flex-col items-center p-6 bg-pink-50 rounded-2xl hover:bg-pink-100 transition-all transform hover:scale-110">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <path d="M8 14s1.5 2 4 2 4-2 4-2"></path>
+                                <line x1="9" y1="9" x2="9.01" y2="9"></line>
+                                <line x1="15" y1="9" x2="15.01" y2="9"></line>
+                            </svg>
+                            <span class="mt-2 text-sm font-semibold">Happy</span>
+                        </button>
+                        <button onclick="handleMood('sad')" class="flex flex-col items-center p-6 bg-pink-50 rounded-2xl hover:bg-pink-100 transition-all transform hover:scale-110">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <path d="M16 16s-1.5-2-4-2-4 2-4 2"></path>
+                                <line x1="9" y1="9" x2="9.01" y2="9"></line>
+                                <line x1="15" y1="9" x2="15.01" y2="9"></line>
+                            </svg>
+                            <span class="mt-2 text-sm font-semibold">Sad</span>
+                        </button>
+                        <button onclick="handleMood('angry')" class="flex flex-col items-center p-6 bg-pink-50 rounded-2xl hover:bg-pink-100 transition-all transform hover:scale-110">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="8" y1="15" x2="16" y2="15"></line>
+                                <line x1="9" y1="9" x2="9.01" y2="9"></line>
+                                <line x1="15" y1="9" x2="15.01" y2="9"></line>
+                            </svg>
+                            <span class="mt-2 text-sm font-semibold">Angry</span>
+                        </button>
+                    </div>
+
+                    <div id="moodResponse" class="hidden bg-gradient-to-r from-pink-100 to-purple-100 p-6 rounded-2xl">
+                        <p class="text-lg text-gray-800 text-center cursive" id="moodText"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Riya's Personal Notes -->
+            <div class="bg-white/90 backdrop-blur-sm rounded-3xl shadow-2xl p-8 mb-6">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-2xl font-bold text-pink-600 cursive">My Personal Notes 📝</h3>
+                    <button onclick="toggleNoteInput()" id="addNoteBtn" class="bg-pink-500 text-white px-4 py-2 rounded-xl hover:bg-pink-600 transition-all transform hover:scale-105">
+                        + Add Note
+                    </button>
+                </div>
+
+                <div id="noteInputSection" class="hidden mb-6 animate-fadeIn">
+                    <textarea id="noteTextarea" placeholder="Write your thoughts, feelings, or anything you want to share..." class="w-full p-4 rounded-xl border-2 border-pink-200 focus:border-pink-400 focus:outline-none resize-none cursive" rows="4"></textarea>
+                    <button onclick="saveNote()" class="mt-3 bg-gradient-to-r from-pink-400 to-purple-400 text-white px-6 py-2 rounded-xl hover:from-pink-500 hover:to-purple-500 transition-all transform hover:scale-105">
+                        Save Note 💕
+                    </button>
+                </div>
+
+                <div id="notesContainer" class="space-y-4 max-h-96 overflow-y-auto">
+                    <p class="text-gray-500 text-center py-8 cursive">No notes yet. Start writing your heart out! 💭</p>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Secret Note Button -->
+        <button onclick="toggleSecretNote()" class="fixed bottom-8 right-8 bg-gradient-to-r from-pink-500 to-purple-500 p-4 rounded-full shadow-2xl hover:scale-110 transition-all animate-pulse-custom z-20">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="white">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+            </svg>
+        </button>
+
+        <!-- Secret Note Modal -->
+        <div id="secretNoteModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-fadeIn" onclick="toggleSecretNote()">
+            <div class="bg-white rounded-3xl p-8 max-w-md shadow-2xl" onclick="event.stopPropagation()">
+                <div class="text-center">
+                    <svg class="mx-auto mb-4 animate-pulse-custom" width="48" height="48" viewBox="0 0 24 24" fill="#ec4899">
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                    </svg>
+                    <p class="text-2xl text-gray-800 mb-4 cursive" id="secretNoteText"></p>
+                    <button onclick="toggleSecretNote()" class="bg-pink-500 text-white px-6 py-2 rounded-xl hover:bg-pink-600 transition-all">
+                        Close 💕
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration - CHANGE THIS DATE TO YOUR ACTUAL START DATE
+        const RELATIONSHIP_START_DATE = new Date('2024-01-01');
+
+        // Daily Messages (365 messages)
+        const dailyMessages = [
+            { day: 1, msg: "You're my sunshine, Riya. ☀️", note: "Every morning starts with thinking about you." },
+            { day: 2, msg: "I'm so proud of you, my love. 💪", note: "Your strength inspires me every single day." },
+            { day: 3, msg: "No matter what happens, I'm here. 🤝", note: "Through storms and sunshine, always together." },
+            { day: 4, msg: "Your smile is the best part of my day. 😊", note: "It lights up my entire world." },
+            { day: 5, msg: "Tumi amar shob theke priyo manush. 💝", note: "In every language, you're my favorite person." },
+            { day: 6, msg: "Missing you feels like missing a part of me. 💔", note: "You complete me, Riya." },
+            { day: 7, msg: "Thank you for being YOU. 🌟", note: "Perfect just the way you are." },
+            { day: 8, msg: "Your laugh is my favorite sound. 😄", note: "I could listen to it forever." },
+            { day: 9, msg: "Riya, you make ordinary moments magical. ✨", note: "With you, everything is special." },
+            { day: 10, msg: "I fall for you more every single day. 💕", note: "Deeper and deeper, endlessly." },
+            { day: 11, msg: "You're not just my love, you're my best friend. 👫", note: "The perfect combination." },
+            { day: 12, msg: "Your eyes hold entire galaxies. 🌌", note: "I get lost in them beautifully." },
+            { day: 13, msg: "Tomar chokhe amar puro prithibi. 🌍", note: "My whole world reflected in your eyes." },
+            { day: 14, msg: "Every love song reminds me of you. 🎵", note: "You're my melody, my rhythm." },
+            { day: 15, msg: "You're the reason I believe in forever. ♾️", note: "With you, always isn't long enough." },
+            { day: 16, msg: "Your happiness is my only goal. 🎯", note: "Seeing you smile makes everything worth it." },
+            { day: 17, msg: "Riya, you're my safe place. 🏡", note: "Home is wherever you are." },
+            { day: 18, msg: "I love your silly jokes and weird habits. 🤪", note: "Every quirk makes you more perfect." },
+            { day: 19, msg: "You're stronger than you think. 💪", note: "Your courage amazes me daily." },
+            { day: 20, msg: "Missing your voice right now. 🎙️", note: "Sweetest sound in my universe." },
+            { day: 21, msg: "Tumi jodi raji thako, lifetime er jonno. 💍", note: "Forever sounds good with you." },
+            { day: 22, msg: "Your dreams are important to me. 🌠", note: "I'll support every single one." },
+            { day: 23, msg: "You make me want to be better. 📈", note: "Growing together, always." },
+            { day: 24, msg: "Riya's mood = My mood. 💯", note: "We're beautifully connected." },
+            { day: 25, msg: "Your kindness touches my heart. 💖", note: "The most beautiful soul I know." },
+            { day: 26, msg: "I love how you care about little things. 🌸", note: "Your attention to detail is adorable." },
+            { day: 27, msg: "You're my midnight thought and morning dream. 🌙☀️", note: "First and last thought of every day." },
+            { day: 28, msg: "Tomar hate amar hat, perfect fit. 🤝", note: "Made for each other, literally." },
+            { day: 29, msg: "You're my favorite notification. 📱", note: "Heart skips when I see your name." },
+            { day: 30, msg: "One month of loving you isn't enough. ❤️", note: "I need forever and then some more." }
+        ];
+
+        // Extend to 365 days
+        for (let i = 31; i <= 365; i++) {
+            dailyMessages.push({
+                day: i,
+                msg: `Day ${i}: You're still my everything, Riya. 💕`,
+                note: "Every day with you is a blessing I never want to end."
+            });
+        }
+
+        // Mood Responses
+        const moodResponses = {
+            happy: "Your smile is my favorite view! Keep shining, my love. ✨",
+            sad: "Even clouds hide the sun, but it's always there — like me for you. I'm here, always. 🤗",
+            angry: "Ok ok meri Riya queen, calm down. Let me hug you tight first 😘💕"
+        };
+
+        // Secret Notes
+        const secretNotes = [
+            "Riya'r chokh sobcheye sundor jinish ei duniya te 💕",
+            "Your voice is my favorite melody 🎵",
+            "The way you scrunch your nose when you laugh = cutest thing ever 😊",
+            "I love how you care so deeply about everything 💝",
+            "Your determination inspires me every single day 🌟",
+            "Even your angry face is adorable (don't tell anyone I said this) 🤫"
+        ];
+
+        // State
+        let showingMood = false;
+        let showingNoteInput = false;
+        let riyasNotes = [];
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            createFloatingHearts();
+            loadNotes();
+        });
+
+        // Floating Hearts
+        function createFloatingHearts() {
+            setInterval(() => {
+                const heart = document.createElement('div');
+                heart.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="#fbbcf4"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>`;
+                heart.className = 'heart-icon animate-float';
+                heart.style.left = Math.random() * 100 + '%';
+                heart.style.bottom = '-50px';
+                document.getElementById('heartsContainer').appendChild(heart);
+                
+                setTimeout(() => heart.remove(), 4000);
+            }, 800);
+        }
+
+        // Login
+        function handleLogin() {
+            const password = document.getElementById('passwordInput').value;
+            if (password === 'lokki' || password === 'moonlight') {
+                document.getElementById('loginBox').style.transform = 'scale(0)';
+                document.getElementById('loginBox').style.opacity = '0';
+                
+                setTimeout(() => {
+                    document.getElementById('loginPage').classList.add('hidden');
+                    document.getElementById('dashboard').classList.remove('hidden');
+                    initializeDashboard();
+                }, 1000);
+            } else {
+                alert('Wrong password! Only Riya can enter 💕');
+            }
+        }
+
+        // Initialize Dashboard
+        function initializeDashboard() {
+            updateDailyMessage();
+            updateDaysCount();
+        }
+
+        // Update Daily Message
+        function updateDailyMessage() {
+            const now = new Date();
+            const start = new Date(now.getFullYear(), 0, 0);
+            const diff = now - start;
+            const oneDay = 1000 * 60 * 60 * 24;
+            const dayOfYear = Math.floor(diff / oneDay);
+            const currentDay = (dayOfYear % 365) || 365;
+            
+            document.getElementById('currentDay').textContent = currentDay;
+            
+            const message = dailyMessages[currentDay - 1] || dailyMessages[0];
+            document.getElementById('dailyMessage').textContent = message.msg;
+            document.getElementById('dailyNote').textContent = message.note;
+        }
+
+        // Update Days Count
+        function updateDaysCount() {
+            const now = new Date();
+            const diff = now - RELATIONSHIP_START_DATE;
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            document.getElementById('daysCount').textContent = days;
+        }
+
+        // Toggle Mood Section
+        function toggleMoodSection() {
+            showingMood = !showingMood;
+            const content = document.getElementById('moodContent');
+            const arrow = document.getElementById('moodArrow');
+            
+            if (showingMood) {
+                content.classList.remove('hidden');
+                arrow.textContent = '▼';
+            } else {
+                content.classList.add('hidden');
+                arrow.textContent = '▶';
+            }
+        }
+
+        // Handle Mood
+        function handleMood(mood) {
+            const response = document.getElementById('moodResponse');
+            const text = document.getElementById('moodText');
+            
+            text.textContent = moodResponses[mood];
+            response.classList.remove('hidden');
+            
+            setTimeout(() => {
+                response.classList.add('hidden');
+            }, 5000);
+        }
+
+        // Toggle Note Input
+        function toggleNoteInput() {
+            showingNoteInput = !showingNoteInput;
+            const section = document.getElementById('noteInputSection');
+            const btn = document.getElementById('addNoteBtn');
+            
+            if (showingNoteInput) {
+                section.classList.remove('hidden');
+                btn.textContent = 'Cancel';
+            } else {
+                section.classList.add('hidden');
+                btn.textContent = '+ Add Note';
+                document.getElementById('noteTextarea').value = '';
+            }
+        }
+
+        // Save Note
+        function saveNote() {
+            const textarea = document.getElementById('noteTextarea');
+            const text = textarea.value.trim();
+            
+            if (!text) return;
+            
+            const note = {
+                id: Date.now(),
+                text: text,
+                date: new Date().toLocaleDateString('en-GB'),
+                time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+            };
+            
+            riyasNotes.unshift(note);
+            localStorage.setItem('riyasNotes', JSON.stringify(riyasNotes));
+            
+            textarea.value = '';
+            toggleNoteInput();
+            displayNotes();
+        }
+
+        // Load Notes
+        function loadNotes() {
+            const saved = localStorage.getItem('riyasNotes');
+            if (saved) {
+                riyasNotes = JSON.parse(saved);
+                displayNotes();
+            }
+        }
+
+        // Display Notes
+        function displayNotes() {
+            const container = document.getElementById('notesContainer');
+            
+            if (riyasNotes.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 text-center py-8 cursive">No notes yet. Start writing your heart out! 💭</p>';
+                return;
+            }
+            
+            container.innerHTML = riyasNotes.map(note => `
+                <div class="bg-pink-50 p-4 rounded-xl border-l-4 border-pink-400">
+                    <p class="text-gray-800 mb-2 cursive">${note.text}</p>
+                    <p class="text-sm text-gray-500">${note.date} at ${note.time}</p>
+                </div>
+            `).join('');
+        }
+
+        // Toggle Secret Note
+        function toggleSecretNote() {
+            const modal = document.getElementById('secretNoteModal');
+            const text = document.getElementById('secretNoteText');
+            
+            if (modal.classList.contains('hidden')) {
+                const randomNote = secretNotes[Math.floor(Math.random() * secretNotes.length)];
+                text.textContent = randomNote;
+                modal.classList.remove('hidden');
+            } else {
+                modal.classList.add('hidden');
+            }
+        }
+
+        // Enter key for password
+        document.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !document.getElementById('loginPage').classList.contains('hidden')) {
+                handleLogin();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -68,6 +68,15 @@
         .hidden {
             display: none;
         }
+
+        .admin-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body class="bg-gradient-to-br from-pink-100 via-purple-50 to-pink-50 min-h-screen overflow-x-hidden">
@@ -116,7 +125,10 @@
             
             <!-- Header -->
             <div class="text-center mb-8">
-                <h1 class="text-5xl font-bold text-pink-600 mb-2 cursive">Welcome Back, Riya 💕</h1>
+                <div class="flex items-center justify-center gap-3 mb-2">
+                    <h1 class="text-5xl font-bold text-pink-600 cursive">Welcome Back, Riya 💕</h1>
+                    <span id="adminBadge" class="hidden admin-badge">Admin View 👁️</span>
+                </div>
                 <div class="flex items-center justify-center gap-2 text-gray-600">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
@@ -199,13 +211,31 @@
 
                 <div id="noteInputSection" class="hidden mb-6 animate-fadeIn">
                     <textarea id="noteTextarea" placeholder="Write your thoughts, feelings, or anything you want to share..." class="w-full p-4 rounded-xl border-2 border-pink-200 focus:border-pink-400 focus:outline-none resize-none cursive" rows="4"></textarea>
-                    <button onclick="saveNote()" class="mt-3 bg-gradient-to-r from-pink-400 to-purple-400 text-white px-6 py-2 rounded-xl hover:from-pink-500 hover:to-purple-500 transition-all transform hover:scale-105">
-                        Save Note 💕
+                    <div class="flex gap-3 mt-3">
+                        <button onclick="saveNote()" class="flex-1 bg-gradient-to-r from-pink-400 to-purple-400 text-white px-6 py-2 rounded-xl hover:from-pink-500 hover:to-purple-500 transition-all transform hover:scale-105">
+                            Save Note 💕
+                        </button>
+                    </div>
+                </div>
+
+                <div class="mb-4 flex justify-between items-center">
+                    <p class="text-sm text-gray-500">
+                        <span id="noteCount">0</span> notes • 
+                        <span id="syncStatus" class="text-green-600">☁️ Synced</span>
+                    </p>
+                    <button onclick="refreshNotes()" class="text-sm text-pink-600 hover:text-pink-700 flex items-center gap-1">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="23 4 23 10 17 10"></polyline>
+                            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                        </svg>
+                        Refresh
                     </button>
                 </div>
 
                 <div id="notesContainer" class="space-y-4 max-h-96 overflow-y-auto">
-                    <p class="text-gray-500 text-center py-8 cursive">No notes yet. Start writing your heart out! 💭</p>
+                    <div class="flex justify-center py-8">
+                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-pink-500"></div>
+                    </div>
                 </div>
             </div>
 
@@ -237,6 +267,10 @@
     <script>
         // Configuration - CHANGE THIS DATE TO YOUR ACTUAL START DATE
         const RELATIONSHIP_START_DATE = new Date('2024-01-01');
+
+        // Passwords
+        const RIYA_PASSWORDS = ['lokki', 'moonlight'];
+        const ADMIN_PASSWORD = 'admin2025'; // YOUR SECRET ADMIN PASSWORD
 
         // Daily Messages (365 messages)
         const dailyMessages = [
@@ -301,12 +335,11 @@
         // State
         let showingMood = false;
         let showingNoteInput = false;
-        let riyasNotes = [];
+        let isAdmin = false;
 
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
             createFloatingHearts();
-            loadNotes();
         });
 
         // Floating Hearts
@@ -326,24 +359,40 @@
         // Login
         function handleLogin() {
             const password = document.getElementById('passwordInput').value;
-            if (password === 'lokki' || password === 'moonlight') {
-                document.getElementById('loginBox').style.transform = 'scale(0)';
-                document.getElementById('loginBox').style.opacity = '0';
-                
-                setTimeout(() => {
-                    document.getElementById('loginPage').classList.add('hidden');
-                    document.getElementById('dashboard').classList.remove('hidden');
-                    initializeDashboard();
-                }, 1000);
+            
+            if (RIYA_PASSWORDS.includes(password)) {
+                isAdmin = false;
+                proceedToLogin();
+            } else if (password === ADMIN_PASSWORD) {
+                isAdmin = true;
+                proceedToLogin();
             } else {
                 alert('Wrong password! Only Riya can enter 💕');
             }
         }
 
+        function proceedToLogin() {
+            document.getElementById('loginBox').style.transform = 'scale(0)';
+            document.getElementById('loginBox').style.opacity = '0';
+            
+            setTimeout(() => {
+                document.getElementById('loginPage').classList.add('hidden');
+                document.getElementById('dashboard').classList.remove('hidden');
+                initializeDashboard();
+            }, 1000);
+        }
+
         // Initialize Dashboard
-        function initializeDashboard() {
+        async function initializeDashboard() {
             updateDailyMessage();
             updateDaysCount();
+            
+            if (isAdmin) {
+                document.getElementById('adminBadge').classList.remove('hidden');
+                document.getElementById('addNoteBtn').classList.add('hidden');
+            }
+            
+            await loadNotes();
         }
 
         // Update Daily Message
@@ -400,6 +449,11 @@
 
         // Toggle Note Input
         function toggleNoteInput() {
+            if (isAdmin) {
+                alert('Admin can only read notes, not write! 👀');
+                return;
+            }
+            
             showingNoteInput = !showingNoteInput;
             const section = document.getElementById('noteInputSection');
             const btn = document.getElementById('addNoteBtn');
@@ -414,8 +468,13 @@
             }
         }
 
-        // Save Note
-        function saveNote() {
+        // Save Note (with Cloud Storage)
+        async function saveNote() {
+            if (isAdmin) {
+                alert('Admin cannot write notes!');
+                return;
+            }
+            
             const textarea = document.getElementById('noteTextarea');
             const text = textarea.value.trim();
             
@@ -428,38 +487,112 @@
                 time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
             };
             
-            riyasNotes.unshift(note);
-            localStorage.setItem('riyasNotes', JSON.stringify(riyasNotes));
-            
-            textarea.value = '';
-            toggleNoteInput();
-            displayNotes();
+            try {
+                document.getElementById('syncStatus').innerHTML = '⏳ Saving...';
+                
+                // Save to cloud storage
+                await window.storage.set(`diary-note-${note.id}`, JSON.stringify(note), true);
+                
+                document.getElementById('syncStatus').innerHTML = '☁️ Synced';
+                textarea.value = '';
+                toggleNoteInput();
+                await loadNotes();
+            } catch (error) {
+                console.error('Failed to save note:', error);
+                document.getElementById('syncStatus').innerHTML = '❌ Failed';
+                alert('Failed to save note. Please try again!');
+            }
         }
 
-        // Load Notes
-        function loadNotes() {
-            const saved = localStorage.getItem('riyasNotes');
-            if (saved) {
-                riyasNotes = JSON.parse(saved);
-                displayNotes();
+        // Load Notes from Cloud
+        async function loadNotes() {
+            try {
+                document.getElementById('syncStatus').innerHTML = '⏳ Loading...';
+                
+                // Get all note keys from cloud storage
+                const result = await window.storage.list('diary-note-', true);
+                
+                if (!result || !result.keys || result.keys.length === 0) {
+                    displayNotes([]);
+                    document.getElementById('syncStatus').innerHTML = '☁️ Synced';
+                    return;
+                }
+                
+                // Fetch all notes
+                const notes = [];
+                for (const key of result.keys) {
+                    try {
+                        const noteResult = await window.storage.get(key, true);
+                        if (noteResult && noteResult.value) {
+                            notes.push(JSON.parse(noteResult.value));
+                        }
+                    } catch (err) {
+                        console.log('Error loading note:', key);
+                    }
+                }
+                
+                // Sort by ID (newest first)
+                notes.sort((a, b) => b.id - a.id);
+                
+                displayNotes(notes);
+                document.getElementById('syncStatus').innerHTML = '☁️ Synced';
+                document.getElementById('noteCount').textContent = notes.length;
+                
+            } catch (error) {
+                console.error('Failed to load notes:', error);
+                document.getElementById('syncStatus').innerHTML = '❌ Error';
+                displayNotes([]);
             }
         }
 
         // Display Notes
-        function displayNotes() {
+        function displayNotes(notes) {
             const container = document.getElementById('notesContainer');
             
-            if (riyasNotes.length === 0) {
+            if (notes.length === 0) {
                 container.innerHTML = '<p class="text-gray-500 text-center py-8 cursive">No notes yet. Start writing your heart out! 💭</p>';
                 return;
             }
             
-            container.innerHTML = riyasNotes.map(note => `
-                <div class="bg-pink-50 p-4 rounded-xl border-l-4 border-pink-400">
-                    <p class="text-gray-800 mb-2 cursive">${note.text}</p>
-                    <p class="text-sm text-gray-500">${note.date} at ${note.time}</p>
+            container.innerHTML = notes.map(note => `
+                <div class="bg-pink-50 p-4 rounded-xl border-l-4 border-pink-400 hover:shadow-md transition-shadow">
+                    <p class="text-gray-800 mb-2 cursive whitespace-pre-wrap">${escapeHtml(note.text)}</p>
+                    <div class="flex justify-between items-center">
+                        <p class="text-sm text-gray-500">${note.date} at ${note.time}</p>
+                        ${isAdmin ? '' : `<button onclick="deleteNote(${note.id})" class="text-red-400 hover:text-red-600 text-sm">Delete</button>`}
+                    </div>
                 </div>
             `).join('');
+        }
+
+        // Delete Note
+        async function deleteNote(noteId) {
+            if (!confirm('Are you sure you want to delete this note?')) {
+                return;
+            }
+            
+            try {
+                document.getElementById('syncStatus').innerHTML = '⏳ Deleting...';
+                await window.storage.delete(`diary-note-${noteId}`, true);
+                document.getElementById('syncStatus').innerHTML = '☁️ Synced';
+                await loadNotes();
+            } catch (error) {
+                console.error('Failed to delete note:', error);
+                document.getElementById('syncStatus').innerHTML = '❌ Failed';
+                alert('Failed to delete note. Please try again!');
+            }
+        }
+
+        // Refresh Notes
+        async function refreshNotes() {
+            await loadNotes();
+        }
+
+        // Escape HTML to prevent XSS
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
         }
 
         // Toggle Secret Note
